@@ -30,8 +30,6 @@ require('./config/passport')();
 var initData = require('./initialization/initDefaultData');
 initData.initSaveAllProvinces();
 
-initData.initSaveAllCitys();
-
 // Start the app by listening on <port>
 app.listen(config.port);
 

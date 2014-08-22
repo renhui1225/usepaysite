@@ -19,9 +19,8 @@ var SecondaryClassSchema = new Schema({
         type: String,
         require: true
     },
-    oneLevel:{
-        type:Schema.ObjectId,
-        ref:'Onelevel'
+    oneLevelID:{
+        type: Number
     } //一级分类
 });
 

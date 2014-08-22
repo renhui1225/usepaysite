@@ -11,10 +11,15 @@ var mongoose = require('mongoose'),
  */
 var AreaSchema;
 AreaSchema = new Schema({
-    id: {type: Number},
-    fatherID: {type: Number}, //市级ID
-    areaID: {type: Number}, //县区级ID
-    areaName: {type: String} //县区名称ss
+    areaID:{
+        type:Number
+    },
+    areaName:{
+        type: String
+    },
+    cityID: {
+        type: String
+    }
 });
 
 mongoose.model('Area', AreaSchema);

@@ -26,6 +26,7 @@ var initSaveAllProvinces = function(){
         });
     }
 
+
     var location_cityJSON  = require("../utils/core/location_citys");
     City.find().remove(function (err) {
         if (err) {
@@ -63,6 +64,7 @@ var initSaveAllProvinces = function(){
             areaItem.save();
         });
     }
+
 };
 
 module.exports ={

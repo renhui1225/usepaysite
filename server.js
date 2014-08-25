@@ -25,10 +25,11 @@ var app = require('./config/express')(db);
 // Bootstrap passport config
 require('./config/passport')();
 
-
+/*
 //此处初始化数据
 var initData = require('./initialization/initDefaultData');
 initData.initDefaultData();
+*/
 
 // Start the app by listening on <port>
 app.listen(config.port);

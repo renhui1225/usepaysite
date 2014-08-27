@@ -18,7 +18,8 @@ var express = require('express'),
 	flash = require('connect-flash'),
 	config = require('./config'),
 	consolidate = require('consolidate'),
-    multer = require('multer'),
+  //  multer = require('multer'),
+    connect = require('connect'),
 	path = require('path');
 
 
@@ -112,11 +113,11 @@ module.exports = function(db) {
 	app.use(helmet.ienoopen());
 	app.disable('x-powered-by');
 
-//  Use multer
-    app.use(multer({
-        dest: "./uploads"
-    }));
-
+////  Use multer
+//    app.use(multer({
+//        dest: "./uploads"
+//    }));
+    app.use(connect.multipart({ uploadDir: "./uploads" }));                   // required for file upload
 	// Setting the app router and static folder
 	app.use(express.static(path.resolve('./public')));
 

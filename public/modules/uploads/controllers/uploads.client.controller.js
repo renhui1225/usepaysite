@@ -1,59 +1,90 @@
 'use strict';
 
-angular.module('uploads' ).controller('UploadsController', ['$scope', '$routeParams', 'FileUploader', function($scope, $routeParams, FileUploader) {
-    $scope.thislist = 'shoplist';
-    $scope.thisitem = $routeParams.shopId;
-    var uploader = $scope.uploader = new FileUploader({
-        url: '/uploads/imgImg'
-    });
-    uploader.headers.resshopid = $routeParams.shopId;
-    uploader.headers.type = '2';
-    // FILTERS
+angular.module('uploads').controller('UploadsController',['$scope', '$http', '$timeout', '$upload',
+    function ($scope, $http, $timeout, $upload) {
+        $scope.uploadRightAway = true;
+        $scope.changeAngularVersion = function () {
+            window.location.hash = $scope.angularVersion;
+            window.location.reload(true);
+        };
+		$scope.hasUploader = function (index) {
+			return $scope.upload[index] != null;
+		};
+		$scope.abort = function (index) {
+			$scope.upload[index].abort();
+			$scope.upload[index] = null;
+		};
+        $scope.angularVersion = '1.2.23';
 
-    uploader.filters.push({
-        name: 'imageFilter',
-        fn: function(item /*{File|FileLikeObject}*/, options) {
-            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-            return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-        }
-    });
+		//$scope.angularVersion = window.location.hash.length > 1 ? window.location.hash.substring(1) : '1.2.0';
+		$scope.onFileSelect = function ($files) {
+			$scope.selectedFiles = [];
+			$scope.progress = [];
+			if ($scope.upload && $scope.upload.length > 0) {
+				for (var i = 0; i < $scope.upload.length; i++) {
+					if ($scope.upload[i] != null) {
+						$scope.upload[i].abort();
+					}
+				}
+			}
+			$scope.upload = [];
+			$scope.uploadResult = [];
+			$scope.selectedFiles = $files;
+			$scope.dataUrls = [];
+			for (var i = 0; i < $files.length; i++) {
+				var $file = $files[i];
+				if (window.FileReader && $file.type.indexOf('image') > -1) {
+					var fileReader = new FileReader();
+					fileReader.readAsDataURL($files[i]);
+                    (function setPreview(fileReader, index) {
+						fileReader.onload = function (e) {
+							$timeout(function () {
+								$scope.dataUrls[index] = e.target.result;
+							});
+						};
+					})(fileReader, i);
+					//setPreview(fileReader, i);
+				}
+				$scope.progress[i] = -1;
+				if ($scope.uploadRightAway) {
+					$scope.start(i);
+				}
+			}
+		};
 
-    // CALLBACKS
-
-    uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
-        console.info('onWhenAddingFileFailed', item, filter, options);
-    };
-    uploader.onAfterAddingFile = function(fileItem) {
-        console.info('onAfterAddingFile', fileItem);
-        console.info($scope.uploader.queue)
-    };
-    uploader.onAfterAddingAll = function(addedFileItems) {
-        console.info('onAfterAddingAll', addedFileItems);
-    };
-    uploader.onBeforeUploadItem = function(item) {
-        console.info('onBeforeUploadItem', item);
-    };
-    uploader.onProgressItem = function(fileItem, progress) {
-        console.info('onProgressItem', fileItem, progress);
-    };
-    uploader.onProgressAll = function(progress) {
-        console.info('onProgressAll', progress);
-    };
-    uploader.onSuccessItem = function(fileItem, response, status, headers) {
-        console.info('onSuccessItem', fileItem, response, status, headers);
-    };
-    uploader.onErrorItem = function(fileItem, response, status, headers) {
-        console.info('onErrorItem', fileItem, response, status, headers);
-    };
-    uploader.onCancelItem = function(fileItem, response, status, headers) {
-        console.info('onCancelItem', fileItem, response, status, headers);
-    };
-    uploader.onCompleteItem = function(fileItem, response, status, headers) {
-        console.info('onCompleteItem', fileItem, response, status, headers);
-    };
-    uploader.onCompleteAll = function() {
-        console.info('onCompleteAll');
-    };
-
-    console.info('uploader', uploader);
-}]);
+		$scope.start = function (index) {
+			$scope.progress[index] = 0;
+			console.log('starting...');
+			console.log($scope.myModel);
+			console.log($scope.selectedFiles[index]);
+			$scope.upload[index] = $upload.upload({
+				url: 'uploads/imgImg',
+				headers: {'myHeaderKey': 'myHeaderVal'},
+				data: {
+					title: $scope.title,
+					author: $scope.author,
+					description: $scope.description
+				},
+				/*
+				 formDataAppender: function(fd, key, val) {
+				 if (angular.isArray(val)) {
+				 angular.forEach(val, function(v) {
+				 fd.append(key, v);
+				 });
+				 } else {
+				 fd.append(key, val);
+				 }
+				 },
+				 */
+				file: $scope.selectedFiles[index],
+				fileFormDataName: 'myFile'
+			}).then(function (response) {
+				console.log('response', response.data);
+				$scope.item=response.data;
+				$scope.uploadResult.push(response.data.result);
+			}, null, function (evt) {
+				$scope.progress[index] = parseInt(100.0 * evt.loaded / evt.total);
+			});
+		};
+	}
+]);
